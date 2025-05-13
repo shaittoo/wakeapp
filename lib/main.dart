@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screen/map_screen.dart';    
+import 'package:wakeapp/screen/splash_screen.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -31,8 +32,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MapScreen(),
+      home: const SplashScreen(),
     );
   }
 }
-
