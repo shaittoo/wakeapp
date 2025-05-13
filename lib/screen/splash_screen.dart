@@ -17,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _navigateToMapScreen() async {
     await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const MapScreen()),
