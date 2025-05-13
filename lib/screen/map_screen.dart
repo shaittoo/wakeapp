@@ -19,32 +19,18 @@ class _MapScreenState extends State<MapScreen> {
     zoom: 16.0, // Adjust zoom as you like
   );
 
-  static const CameraPosition _kLake = CameraPosition(
-    bearing: 192.8,
-    target: LatLng(10.6395288, 122.2215462), // UPV Miagao coordinates
-    tilt: 59.44,
-    zoom: 19.0,
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
-        mapType: MapType.hybrid,
+        mapType: MapType.normal,
         initialCameraPosition: _kGooglePlex,
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
+        zoomGesturesEnabled: true,
+        zoomControlsEnabled: true,
       ),
     );
-  }
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }
