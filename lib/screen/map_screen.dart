@@ -109,7 +109,6 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         listOfLocation = json.decode(response.body)['predictions'];
       });
-      print('API response: ${response.body}');
     } else {
       setState(() {
         listOfLocation = [];
