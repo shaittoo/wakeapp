@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakeapp/main.dart';
 import 'map_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const MapScreen()),
+      MaterialPageRoute(builder: (context) => const MainNavigation()),
     );
   }
 
