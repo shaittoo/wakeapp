@@ -116,60 +116,6 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
               ],
             ),
             SizedBox(height: 16),
-            // Repetitive
-            Row(
-              children: [
-                Text('Repetitive', style: TextStyle(fontWeight: FontWeight.bold)),
-                Spacer(),
-                Switch(
-                  value: _repeat,
-                  activeColor: Colors.green,
-                  onChanged: (val) => setState(() => _repeat = val),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            // Days of week
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(7, (i) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _days[i] = !_days[i]),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: _days[i] ? Colors.green : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _dayLabels[i],
-                          style: TextStyle(
-                            color: _days[i] ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-            SizedBox(height: 16),
-            // Favorite
-            Row(
-              children: [
-                Checkbox(
-                  value: _favorite,
-                  activeColor: Colors.green,
-                  onChanged: (val) => setState(() => _favorite = val!),
-                ),
-                Text('Add this Alarm Settings as Favorite'),
-              ],
-            ),
-            SizedBox(height: 24),
             // Buttons
             Row(
               children: [
