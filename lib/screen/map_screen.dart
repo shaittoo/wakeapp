@@ -16,7 +16,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(10.6423590, 122.2309165),
     zoom: 18.0,
@@ -37,7 +38,6 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     searchController.addListener(_onChange);
     _getUserLocation();
-    debugPrint(kGoogleApiKey);
   }
 
   Future<void> _getUserLocation() async {
@@ -102,8 +102,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void placeSuggestion(String input) async {
-    String baseUrl = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
-    String request = '$baseUrl?input=$input&key=$kGoogleApiKey&sessiontoken=$sessionToken';
+    String baseUrl =
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json";
+    String request =
+        '$baseUrl?input=$input&key=$kGoogleApiKey&sessiontoken=$sessionToken';
     var response = await http.get(Uri.parse(request));
     if (response.statusCode == 200) {
       setState(() {
@@ -117,7 +119,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> moveToPlace(String placeId, String description) async {
-    String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$kGoogleApiKey";
+    String detailsUrl =
+        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$kGoogleApiKey";
     var detailsResponse = await http.get(Uri.parse(detailsUrl));
     var detailsData = json.decode(detailsResponse.body);
     double lat = detailsData['result']['geometry']['location']['lat'];
@@ -173,7 +176,8 @@ class _MapScreenState extends State<MapScreen> {
                     decoration: InputDecoration(
                       hintText: 'Search Location...',
                       prefixIcon: Icon(Icons.search, color: Colors.green),
-                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -202,8 +206,11 @@ class _MapScreenState extends State<MapScreen> {
                       itemCount: listOfLocation.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(listOfLocation[index]["description"], style: TextStyle(color: Colors.green[900])),
-                          onTap: () => moveToPlace(listOfLocation[index]["place_id"], listOfLocation[index]["description"]),
+                          title: Text(listOfLocation[index]["description"],
+                              style: TextStyle(color: Colors.green[900])),
+                          onTap: () => moveToPlace(
+                              listOfLocation[index]["place_id"],
+                              listOfLocation[index]["description"]),
                         );
                       },
                     ),
@@ -232,7 +239,8 @@ class _MapScreenState extends State<MapScreen> {
                   mini: true,
                   backgroundColor: Colors.white,
                   onPressed: () async {
-                    final GoogleMapController controller = await _controller.future;
+                    final GoogleMapController controller =
+                        await _controller.future;
                     controller.animateCamera(CameraUpdate.zoomIn());
                   },
                   child: Icon(Icons.add, color: Colors.green),
@@ -243,7 +251,8 @@ class _MapScreenState extends State<MapScreen> {
                   mini: true,
                   backgroundColor: Colors.white,
                   onPressed: () async {
-                    final GoogleMapController controller = await _controller.future;
+                    final GoogleMapController controller =
+                        await _controller.future;
                     controller.animateCamera(CameraUpdate.zoomOut());
                   },
                   child: Icon(Icons.remove, color: Colors.green),
@@ -254,9 +263,11 @@ class _MapScreenState extends State<MapScreen> {
                   mini: true,
                   backgroundColor: Colors.white,
                   onPressed: () async {
-                    final GoogleMapController controller = await _controller.future;
+                    final GoogleMapController controller =
+                        await _controller.future;
                     if (_userLatLng != null) {
-                      controller.animateCamera(CameraUpdate.newLatLng(_userLatLng!));
+                      controller
+                          .animateCamera(CameraUpdate.newLatLng(_userLatLng!));
                     }
                   },
                   child: Icon(Icons.my_location, color: Colors.green),

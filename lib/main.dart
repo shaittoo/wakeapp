@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screen/map_screen.dart';    
+import 'package:wakeapp/screen/splash_screen.dart';
+import 'screen/map_screen.dart';
 import 'screen/timer_screen.dart';
 import 'screen/favorites_screen.dart';
 import 'screen/settings_screen.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
       ),
-      home: const MainNavigation(),
+      home: const SplashScreen(),
     );
   }
 }
