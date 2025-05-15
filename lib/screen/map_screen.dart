@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:location/location.dart';
+import 'package:wakeapp/screen/setalarm.dart';
 
 const kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
 
@@ -260,6 +261,22 @@ class _MapScreenState extends State<MapScreen> {
                     }
                   },
                   child: Icon(Icons.my_location, color: Colors.green),
+                ),
+                SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'set_alarm',
+                  backgroundColor: Colors.green,
+                  child: Icon(Icons.alarm, color: Colors.white),
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      builder: (context) => SetAlarmSheet(),
+                    );
+                  },
                 ),
               ],
             ),
