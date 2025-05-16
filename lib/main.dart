@@ -3,7 +3,6 @@ import 'screen/map_screen.dart';
 import 'screen/timer_screen.dart';
 import 'screen/favorites_screen.dart';
 import 'screen/settings_screen.dart';
-import 'package:wakeapp/screen/map_screen.dart';
 import 'package:wakeapp/screen/setalarm.dart';
 
 void main() {
@@ -84,8 +83,8 @@ class _MainNavigationState extends State<MainNavigation> {
             );
           },
           backgroundColor: Colors.green,
-          child: Icon(Icons.add, size: 48, color: Colors.white),
           shape: CircleBorder(),
+          child: Icon(Icons.add, size: 48, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
