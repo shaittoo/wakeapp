@@ -4,6 +4,7 @@ import 'screen/map_screen.dart';
 import 'screen/timer_screen.dart';
 import 'screen/favorites_screen.dart';
 import 'screen/settings_screen.dart';
+import 'package:wakeapp/screen/setalarm.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,29 +69,71 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      floatingActionButton: SizedBox(
+        width: 80,
+        height: 80,
+        child: FloatingActionButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              builder: (context) => SetAlarmSheet(),
+            );
+          },
+          backgroundColor: Colors.green,
+          shape: CircleBorder(),
+          child: Icon(Icons.add, size: 48, color: Colors.white),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        notchMargin: 8,
+        child: SizedBox(
+          height: 70,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // Home
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    _onItemTapped(0); // Navigate to Home (MapScreen)
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.home, color: Colors.black),
+                      Text('Home', style: TextStyle(color: Colors.black)),
+                    ],
+                  ),
+                ),
+              ),
+              // Spacer for FAB
+              SizedBox(width: 60),
+              // Alarms
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    _onItemTapped(1); // Navigate to Alarms (TimerScreen)
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.alarm, color: Colors.black),
+                      Text('Alarms', style: TextStyle(color: Colors.black)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.timer),
-            label: 'Alarms',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color.fromARGB(255, 23, 87, 25),
-        onTap: _onItemTapped,
+        ),
       ),
     );
   }
