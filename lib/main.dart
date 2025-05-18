@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:wakeapp/screen/splash_screen.dart';
 import 'screen/map_screen.dart';
 import 'screen/timer_screen.dart';
-import 'screen/favorites_screen.dart';
-import 'screen/settings_screen.dart';
 import 'package:wakeapp/screen/setalarm.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'model/alarm.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(AlarmAdapter());
+  await Hive.openBox<Alarm>('alarms');
   runApp(const MyApp());
 }
 
@@ -55,8 +59,6 @@ class _MainNavigationState extends State<MainNavigation> {
   static const List<Widget> _pages = <Widget>[
     MapScreen(),
     TimerScreen(),
-    FavoritesScreen(),
-    SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
