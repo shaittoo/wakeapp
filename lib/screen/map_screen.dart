@@ -19,7 +19,7 @@ class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(10.6423590, 122.2309165),
+    target: LatLng(0, 0),
     zoom: 18.0,
   );
   CameraPosition _currentPosition = _kGooglePlex;
@@ -33,57 +33,81 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _userLatLng;
   bool _userLocationReady = false;
 
+  Location location = Location();
+  StreamSubscription<LocationData>? _locationSubscription;
+
   @override
   void initState() {
     super.initState();
     searchController.addListener(_onChange);
-    _getUserLocation();
+    _initLocationTracking();
   }
 
-  Future<void> _getUserLocation() async {
-    Location location = Location();
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    serviceEnabled = await location.serviceEnabled();
+  Future<void> _initLocationTracking() async {
+    bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
+      if (!serviceEnabled) return;
     }
 
-    permissionGranted = await location.hasPermission();
+    PermissionStatus permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+      if (permissionGranted != PermissionStatus.granted) return;
     }
 
+    // Get initial location
     final userLocation = await location.getLocation();
+    _updateUserLocation(userLocation);
+
+    // Listen for location changes
+    _locationSubscription = location.onLocationChanged.listen((newLocation) {
+      _updateUserLocation(newLocation, animate: true);
+    });
+  }
+
+  void _updateUserLocation(LocationData userLocation,
+      {bool animate = false}) async {
+    if (userLocation.latitude == null || userLocation.longitude == null) return;
+    final LatLng userLatLng =
+        LatLng(userLocation.latitude!, userLocation.longitude!);
+
     setState(() {
       _currentPosition = CameraPosition(
-        target: LatLng(userLocation.latitude!, userLocation.longitude!),
-        zoom: 16.0,
+        target: userLatLng,
+        zoom: 19.5,
       );
-      _userLatLng = LatLng(userLocation.latitude!, userLocation.longitude!);
+      _userLatLng = userLatLng;
+      _markers.removeWhere((m) => m.markerId.value == 'user_location');
       _markers.add(
         Marker(
           markerId: MarkerId('user_location'),
-          position: LatLng(userLocation.latitude!, userLocation.longitude!),
+          position: userLatLng,
           infoWindow: InfoWindow(title: 'Your Location'),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
       );
       _userLocationReady = true;
     });
+
+    if (animate && _controller.isCompleted) {
+      final GoogleMapController controller = await _controller.future;
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: userLatLng,
+            zoom: 19.5, // Street-level zoom
+          ),
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
     searchController.removeListener(_onChange);
     searchController.dispose();
+    _locationSubscription?.cancel();
     super.dispose();
   }
 
@@ -128,7 +152,7 @@ class _MapScreenState extends State<MapScreen> {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newLatLng(LatLng(lat, lng)));
     setState(() {
-      _currentPosition = CameraPosition(target: LatLng(lat, lng), zoom: 16.0);
+      _currentPosition = CameraPosition(target: LatLng(lat, lng), zoom: 18.0);
       searchController.text = description;
       listOfLocation = [];
       isSearching = false;
@@ -266,8 +290,14 @@ class _MapScreenState extends State<MapScreen> {
                     final GoogleMapController controller =
                         await _controller.future;
                     if (_userLatLng != null) {
-                      controller
-                          .animateCamera(CameraUpdate.newLatLng(_userLatLng!));
+                      controller.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: _userLatLng!,
+                            zoom: 19.5, // Street-level zoom
+                          ),
+                        ),
+                      );
                     }
                   },
                   child: Icon(Icons.my_location, color: Colors.green),

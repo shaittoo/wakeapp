@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wakeapp/screen/splash_screen.dart';
 import 'screen/map_screen.dart';
 import 'screen/timer_screen.dart';
-import 'package:wakeapp/screen/setalarm.dart';
+import 'package:wakeapp/screen/setalarm.dart' as setalarm;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'model/alarm.dart';
 
@@ -10,6 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(AlarmAdapter());
+  // deleteAlarmsBox();
   await Hive.openBox<Alarm>('alarms');
   runApp(const MyApp());
 }
@@ -82,7 +83,7 @@ class _MainNavigationState extends State<MainNavigation> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              builder: (context) => SetAlarmSheet(),
+              builder: (context) => setalarm.SetAlarmSheet(),
             );
           },
           backgroundColor: Colors.green,
@@ -139,4 +140,8 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
     );
   }
+}
+
+Future<void> deleteAlarmsBox() async {
+  await Hive.deleteBoxFromDisk('alarms');
 }
