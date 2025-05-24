@@ -46,6 +46,9 @@ dependencies:
   path_provider: ^2.1.2
   geocoding: ^3.0.0
   latlong2: ^0.9.1
+  shared_preferences: ^2.2.2
+  smooth_page_indicator: ^1.1.0
+  google_api_headers: ^1.6.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +76,9 @@ flutter:
   assets:
     - lib/assets/splashscreen_bg.png
     - lib/assets/wakeapp_logo.png
+    - lib/assets/Onboarding_1.png
+    - lib/assets/Onboarding_2.png
+    - lib/assets/Onboarding_3.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
