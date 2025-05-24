@@ -63,38 +63,34 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             ),
             SizedBox(height: 24),
             // On Enter / On Exit
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Checkboxes and labels
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _onEnter,
-                          activeColor: Colors.green,
-                          onChanged: (val) => setState(() => _onEnter = val!),
-                        ),
-                        Text('On Enter'),
-                        SizedBox(width: 16),
-                        Checkbox(
-                          value: _onExit,
-                          activeColor: Colors.green,
-                          onChanged: (val) => setState(() => _onExit = val!),
-                        ),
-                        Text('On Exit'),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(width: 8),
-                // Radius controls
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Checkboxes and labels
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Checkboxes Row
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _onEnter,
+                            activeColor: Colors.green,
+                            onChanged: (val) => setState(() => _onEnter = val!),
+                          ),
+                          Text('On Enter'),
+                          SizedBox(width: 16),
+                          Checkbox(
+                            value: _onExit,
+                            activeColor: Colors.green,
+                            onChanged: (val) => setState(() => _onExit = val!),
+                          ),
+                          Text('On Exit'),
+                        ],
+                      ),
+                      // Radius controls
                       Slider(
                         value: _radius,
                         min: 100,
@@ -104,27 +100,31 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                         onChanged: (val) => setState(() => _radius = val),
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text('${_radius.round()} M',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text(
+                              '${_radius.round()} M',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                           SizedBox(width: 8),
-                          Text('Radius',
-                              style: TextStyle(color: Colors.grey[700])),
+                          Text(
+                            'Radius',
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
                         ],
                       ),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(width: 8),
+                ],
+              ),
             ),
             SizedBox(height: 16),
             // Buttons
