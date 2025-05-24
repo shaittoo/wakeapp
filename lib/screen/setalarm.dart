@@ -5,6 +5,9 @@ import 'package:location/location.dart'; // <-- Add this import
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:vibration/vibration.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
 
@@ -24,14 +27,17 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
   final String _destinationSessionToken = const Uuid().v4();
   List<dynamic> _destinationSuggestions = [];
   bool _isDestinationSearching = false;
-  bool _onEnter = false;
-  bool _onExit = true;
   double _radius = 750;
+  bool _alarmSoundEnabled = true;
+  bool _vibrationEnabled = false;
+  bool _notifyEarlierEnabled = false;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
     _fetchAndSetCurrentLocation();
+    _initNotifications();
   }
 
   Future<void> _fetchAndSetCurrentLocation() async {
@@ -84,6 +90,45 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
     }
   }
 
+  Future<void> _initNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> triggerAlarm() async {
+    if (_alarmSoundEnabled) {
+      final player = AudioPlayer();
+      await player.play(AssetSource('lib/assets/alarm.mp3'));
+    }
+    if (_vibrationEnabled && (await Vibration.hasVibrator() ?? false)) {
+      Vibration.vibrate(duration: 3000);
+    }
+    if (_notifyEarlierEnabled) {
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        'alarm_channel',
+        'Alarm Notifications',
+        channelDescription: 'Alarm notifications for radius',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker',
+      );
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        'Alarm',
+        'You have reached your destination radius!',
+        platformChannelSpecifics,
+        payload: 'alarm',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -105,7 +150,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                     style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green[900])),
+                        color: Colors.green[700])),
                 IconButton(
                   icon: Icon(Icons.close, color: Colors.red),
                   onPressed: () => Navigator.pop(context),
@@ -186,71 +231,76 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
               ),
             ),
             SizedBox(height: 24),
-            // On Enter / On Exit
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            // Radius controls
+            Slider(
+              value: _radius,
+              min: 100,
+              max: 2000,
+              divisions: 19,
+              activeColor: Colors.green,
+              onChanged: (val) => setState(() => _radius = val),
+            ),
+            Text(
+              '	${_radius.round()} M',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            // --- New Alarm Settings Section ---
+            SizedBox(height: 18),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Checkboxes and labels
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Checkboxes Row
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _onEnter,
-                            activeColor: Colors.green,
-                            onChanged: (val) => setState(() => _onEnter = val!),
-                          ),
-                          Text('On Enter'),
-                          SizedBox(width: 16),
-                          Checkbox(
-                            value: _onExit,
-                            activeColor: Colors.green,
-                            onChanged: (val) => setState(() => _onExit = val!),
-                          ),
-                          Text('On Exit'),
-                        ],
-                      ),
-                      // Radius controls
-                      Slider(
-                        value: _radius,
-                        min: 100,
-                        max: 2000,
-                        divisions: 19,
-                        activeColor: Colors.orange,
-                        onChanged: (val) => setState(() => _radius = val),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '${_radius.round()} M',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Radius',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ],
-                      ),
-                    ],
+                  Text(
+                    'Alarm Settings',
+                    style: TextStyle(
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(height: 8),
+                  Divider(),
+                  _buildSettingsRow(
+                    title: 'Alarm sound',
+                    subtitle: 'Wizkid ft Tems | Essence',
+                    value: _alarmSoundEnabled,
+                    onChanged: (val) => setState(() => _alarmSoundEnabled = val),
+                    activeColor: Colors.green,
+                  ),
+                  Divider(),
+                  _buildSettingsRow(
+                    title: 'Vibration',
+                    subtitle: _vibrationEnabled ? '' : 'None',
+                    value: _vibrationEnabled,
+                    onChanged: (val) => setState(() => _vibrationEnabled = val),
+                    activeColor: Colors.green,
+                  ),
+                  Divider(),
+                  _buildSettingsRow(
+                    title: 'Notify me on radius',
+                    subtitle: _notifyEarlierEnabled ? '' : 'None',
+                    value: _notifyEarlierEnabled,
+                    onChanged: (val) => setState(() => _notifyEarlierEnabled = val),
+                    activeColor: Colors.green,
+                  ),
                 ],
               ),
             ),
             SizedBox(height: 16),
+            // Temporary test button for alarm trigger
+            ElevatedButton(
+              onPressed: triggerAlarm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Test Alarm Trigger'),
+            ),
             // Buttons
             Row(
               children: [
@@ -278,12 +328,9 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                     onPressed: () async {
                       final alarm = Alarm(
                         name: _alarmNameController.text,
-                        onEnter: _onEnter,
-                        onExit: _onExit,
+                        onEnter: false,
+                        onExit: false,
                         radius: _radius,
-                        // repeat: _repeat,
-                        // days: List<bool>.from(_days),
-                        // favorite: _favorite,
                       );
                       final box = Hive.box<Alarm>('alarms');
                       await box.add(alarm);
@@ -300,6 +347,31 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsRow({required String title, required String subtitle, required bool value, required ValueChanged<bool> onChanged, required Color activeColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                SizedBox(height: 2),
+                Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+          ),
+        ],
       ),
     );
   }
