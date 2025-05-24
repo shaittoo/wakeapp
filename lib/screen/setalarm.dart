@@ -163,7 +163,10 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       );
                       final box = Hive.box<Alarm>('alarms');
                       await box.add(alarm);
-                      Navigator.pop(context);
+                      // ignore: use_build_context_synchronously
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                     child: Text('Start Alarm',
                         style: TextStyle(fontWeight: FontWeight.bold)),
