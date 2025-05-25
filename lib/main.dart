@@ -10,7 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(AlarmAdapter());
-  // deleteAlarmsBox();
+  deleteAlarmsBox();
   await Hive.openBox<Alarm>('alarms');
   runApp(const MyApp());
 }
@@ -57,8 +57,9 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _pages = <Widget>[
-    MapScreen(),
+  // Update the static pages list to use the global key
+  static List<Widget> _pages = <Widget>[
+    MapScreen(key: MapScreen.globalKey),
     TimerScreen(),
   ];
 
@@ -72,24 +73,28 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_selectedIndex],
-      floatingActionButton: SizedBox(
-        width: 80,
-        height: 80,
-        child: FloatingActionButton(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              builder: (context) => setalarm.SetAlarmSheet(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await showModalBottomSheet<Map<String, dynamic>>(
+            context: context,
+            isScrollControlled: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            builder: (context) => setalarm.SetAlarmSheet(),
+          );
+
+          if (result != null && _selectedIndex == 0) {
+            MapScreen.globalKey.currentState?.updateDestinationMarker(
+              result['name'],
+              result['lat'],
+              result['lng'],
             );
-          },
-          backgroundColor: Colors.green,
-          shape: CircleBorder(),
-          child: Icon(Icons.add, size: 48, color: Colors.white),
-        ),
+          }
+        },
+        backgroundColor: Colors.green,
+        shape: CircleBorder(),
+        child: Icon(Icons.add, size: 48, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
