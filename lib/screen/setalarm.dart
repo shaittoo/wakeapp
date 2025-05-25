@@ -30,17 +30,19 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
   final String _destinationSessionToken = const Uuid().v4();
   List<dynamic> _destinationSuggestions = [];
   bool _isDestinationSearching = false;
+
   double _radius = 750;
   bool _alarmSoundEnabled = true;
   bool _vibrationEnabled = false;
   bool _notifyEarlierEnabled = false;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  double? _selectedLat;
+  double? _selectedLng;
 
   @override
   void initState() {
     super.initState();
     _fetchAndSetCurrentLocation();
-    _initNotifications();
   }
 
   Future<void> _fetchAndSetCurrentLocation() async {
@@ -240,12 +242,30 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       title:
                           Text(_destinationSuggestions[index]["description"]),
                       onTap: () async {
-                        // Optionally fetch place details here if you want coordinates
+                        String placeId =
+                            _destinationSuggestions[index]["place_id"];
+
+                        // Fetch the coordinates for the selected place
+                        String detailsUrl =
+                            "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$kGoogleApiKey";
+                        var detailsResponse =
+                            await http.get(Uri.parse(detailsUrl));
+                        var detailsData = json.decode(detailsResponse.body);
+
+                        // Get the coordinates
+                        double lat = detailsData['result']['geometry']
+                            ['location']['lat'];
+                        double lng = detailsData['result']['geometry']
+                            ['location']['lng'];
+
                         setState(() {
                           _destinationController.text =
                               _destinationSuggestions[index]["description"];
                           _isDestinationSearching = false;
                           _destinationSuggestions = [];
+                          // Store the selected location
+                          _selectedLat = lat;
+                          _selectedLng = lng;
                         });
                       },
                     );
@@ -274,10 +294,10 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
               onChanged: (val) => setState(() => _radius = val),
             ),
             Text(
-              '	${_radius.round()} M',
+              '${_radius.round()} M',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            // --- New Alarm Settings Section ---
+            // --- Alarm Settings Section ---
             SizedBox(height: 18),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
@@ -300,7 +320,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                   Divider(),
                   _buildSettingsRow(
                     title: 'Alarm sound',
-                    subtitle: 'Wizkid ft Tems | Essence',
+                    subtitle: '',
                     value: _alarmSoundEnabled,
                     onChanged: (val) => setState(() => _alarmSoundEnabled = val),
                     activeColor: Colors.green,
@@ -383,6 +403,15 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: () async {
+                      if (_selectedLat == null || _selectedLng == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Please select a destination first')),
+                        );
+                        return;
+                      }
+
                       final alarm = Alarm(
                         name: _alarmNameController.text,
                         onEnter: false,
@@ -391,8 +420,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       );
                       final box = Hive.box<Alarm>('alarms');
                       await box.add(alarm);
-                      // ignore: use_build_context_synchronously
-                      if (mounted) {
+                      if (!mounted) {
                         Navigator.pop(context);
                       }
                     },
