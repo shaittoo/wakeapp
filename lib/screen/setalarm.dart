@@ -342,24 +342,6 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
-              onPressed: () {
-                // Test data
-                final testData = {
-                  'name': 'Test Location',
-                  'lat': 10.6423590,
-                  'lng': 122.2309165,
-                };
-                print('Sending test data: $testData');
-                Navigator.pop(context, testData);
-              },
-              child: Text('Test Send Location',
-                  style: TextStyle(color: Colors.white)),
-            ),
           ],
         ),
       ),
