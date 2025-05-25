@@ -5,9 +5,12 @@ import 'package:location/location.dart'; // <-- Add this import
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:vibration/vibration.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:alarm/alarm.dart' as alarm_pkg;
+import 'package:alarm/model/alarm_settings.dart';
+import 'package:alarm/model/notification_settings.dart';
+import 'package:vibration/vibration.dart';
 
 const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
 
@@ -99,33 +102,63 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> triggerAlarm() async {
-    if (_alarmSoundEnabled) {
-      final player = AudioPlayer();
-      await player.play(AssetSource('lib/assets/alarm.mp3'));
-    }
-    if (_vibrationEnabled && (await Vibration.hasVibrator() ?? false)) {
-      Vibration.vibrate(duration: 3000);
-    }
-    if (_notifyEarlierEnabled) {
-      const AndroidNotificationDetails androidPlatformChannelSpecifics =
-          AndroidNotificationDetails(
-        'alarm_channel',
-        'Alarm Notifications',
-        channelDescription: 'Alarm notifications for radius',
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker',
+  Future<void> setAlarm(DateTime dateTime) async {
+    try {
+      // First stop any existing alarms
+      await alarm_pkg.Alarm.stopAll();
+      
+      final alarmSettings = AlarmSettings(
+        id: DateTime.now().millisecondsSinceEpoch % 100000, // unique id
+        dateTime: dateTime,
+        assetAudioPath: 'assets/AlarmClock.mp3',
+        loopAudio: _alarmSoundEnabled,
+        vibrate: _vibrationEnabled,
+        notificationSettings: NotificationSettings(
+          title: 'Alarm',
+          body: 'Your alarm is ringing!',
+        ),
+        volume: 0.8,
+        fadeDuration: 2.0,
       );
-      const NotificationDetails platformChannelSpecifics =
-          NotificationDetails(android: androidPlatformChannelSpecifics);
-      await flutterLocalNotificationsPlugin.show(
-        0,
-        'Alarm',
-        'You have reached your destination radius!',
-        platformChannelSpecifics,
-        payload: 'alarm',
-      );
+      
+      await alarm_pkg.Alarm.set(alarmSettings: alarmSettings);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Alarm set for ${dateTime.toLocal()}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error setting alarm: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> stopAlarm() async {
+    try {
+      // Force stop all alarms and audio
+      await alarm_pkg.Alarm.stopAll();
+      
+      // Additional cleanup
+      final alarms = await alarm_pkg.Alarm.getAlarms();
+      for (var alarm in alarms) {
+        await alarm_pkg.Alarm.stop(alarm.id);
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Alarm stopped')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error stopping alarm: $e')),
+        );
+      }
     }
   }
 
@@ -293,13 +326,37 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             ),
             SizedBox(height: 16),
             // Temporary test button for alarm trigger
-            ElevatedButton(
-              onPressed: triggerAlarm,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              child: Text('Test Alarm Trigger'),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Set alarm for 1 minute from now for demo
+                      final now = DateTime.now();
+                      await setAlarm(now.add(Duration(minutes: 1)));
+                      if (_vibrationEnabled && await Vibration.hasVibrator()) {
+                        Vibration.vibrate(duration: 1000); // vibrate for 1 second
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Set Alarm for 1 Minute from Now'),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: stopAlarm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Stop Alarm'),
+                  ),
+                ),
+              ],
             ),
             // Buttons
             Row(

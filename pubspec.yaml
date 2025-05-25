@@ -40,7 +40,7 @@ dependencies:
   google_maps_webservice: ^0.0.20-nullsafety.5
   uuid: ^3.0.7
   location: ^5.0.0
-  alarm: ^4.1.1
+  alarm: 4.1.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
@@ -82,7 +82,7 @@ flutter:
     - lib/assets/Onboarding_1.png
     - lib/assets/Onboarding_2.png
     - lib/assets/Onboarding_3.png
-    - lib/assets/alarm.mp3
+    - assets/AlarmClock.mp3
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -5,14 +5,28 @@ import 'screen/timer_screen.dart';
 import 'package:wakeapp/screen/setalarm.dart' as setalarm;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'model/alarm.dart';
+import 'package:alarm/alarm.dart' as alarm_pkg;
+import 'package:vibration/vibration.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  Hive.registerAdapter(AlarmAdapter());
-  // deleteAlarmsBox();
-  await Hive.openBox<Alarm>('alarms');
-  runApp(const MyApp());
+  
+  try {
+    // Initialize Hive
+    await Hive.initFlutter();
+    Hive.registerAdapter(AlarmAdapter());
+    await Hive.openBox<Alarm>('alarms');
+    
+    // Initialize and clean up alarms
+    await alarm_pkg.Alarm.init();
+    await alarm_pkg.Alarm.stopAll(); // Force stop any running alarms
+    
+    runApp(const MyApp());
+  } catch (e) {
+    // log('Error during initialization: $e'); // import 'dart:developer' if you want to use this
+    // Still try to run the app even if there's an error
+    runApp(const MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
