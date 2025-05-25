@@ -6,7 +6,6 @@ import 'package:wakeapp/screen/setalarm.dart' as setalarm;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'model/alarm.dart';
 import 'package:alarm/alarm.dart' as alarm_pkg;
-import 'package:vibration/vibration.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
