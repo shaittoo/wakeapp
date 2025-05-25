@@ -28,6 +28,11 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
   bool _onExit = true;
   double _radius = 750;
 
+  // Add these variables to store selected location
+  String? _selectedDescription;
+  double? _selectedLat;
+  double? _selectedLng;
+
   @override
   void initState() {
     super.initState();
@@ -162,12 +167,35 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       title:
                           Text(_destinationSuggestions[index]["description"]),
                       onTap: () async {
-                        // Optionally fetch place details here if you want coordinates
+                        String placeId =
+                            _destinationSuggestions[index]["place_id"];
+                        String description =
+                            _destinationSuggestions[index]["description"];
+
+                        // Fetch the coordinates for the selected place
+                        String detailsUrl =
+                            "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$kGoogleApiKey";
+                        var detailsResponse =
+                            await http.get(Uri.parse(detailsUrl));
+                        var detailsData = json.decode(detailsResponse.body);
+
+                        // Get the coordinates
+                        double lat = detailsData['result']['geometry']
+                            ['location']['lat'];
+                        double lng = detailsData['result']['geometry']
+                            ['location']['lng'];
+
+                        print(
+                            'Selected destination: $description at ($lat, $lng)');
+
                         setState(() {
-                          _destinationController.text =
-                              _destinationSuggestions[index]["description"];
+                          _destinationController.text = description;
                           _isDestinationSearching = false;
                           _destinationSuggestions = [];
+                          // Store the selected location
+                          _selectedDescription = description;
+                          _selectedLat = lat;
+                          _selectedLng = lng;
                         });
                       },
                     );
@@ -224,10 +252,12 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                         onChanged: (val) => setState(() => _radius = val),
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center horizontally
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
@@ -276,20 +306,34 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: () async {
+                      if (_selectedLat == null || _selectedLng == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Please select a destination first')),
+                        );
+                        return;
+                      }
+
                       final alarm = Alarm(
                         name: _alarmNameController.text,
                         onEnter: _onEnter,
                         onExit: _onExit,
                         radius: _radius,
-                        // repeat: _repeat,
-                        // days: List<bool>.from(_days),
-                        // favorite: _favorite,
                       );
                       final box = Hive.box<Alarm>('alarms');
                       await box.add(alarm);
-                      // ignore: use_build_context_synchronously
+
+                      print('Sending from SetAlarmSheet:');
+                      print('Name: $_selectedDescription');
+                      print('Location: $_selectedLat, $_selectedLng');
+
                       if (mounted) {
-                        Navigator.pop(context);
+                        Navigator.pop(context, {
+                          'name': _selectedDescription,
+                          'lat': _selectedLat,
+                          'lng': _selectedLng,
+                        });
                       }
                     },
                     child: Text('Start Alarm',
@@ -297,6 +341,24 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+              onPressed: () {
+                // Test data
+                final testData = {
+                  'name': 'Test Location',
+                  'lat': 10.6423590,
+                  'lng': 122.2309165,
+                };
+                print('Sending test data: $testData');
+                Navigator.pop(context, testData);
+              },
+              child: Text('Test Send Location',
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
