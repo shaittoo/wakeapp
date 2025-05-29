@@ -7,31 +7,31 @@ class Alarm extends HiveObject {
   @HiveField(0)
   String name;
 
-  @HiveField(1)
-  bool onEnter;
-
-  @HiveField(2)
-  bool onExit;
-
   @HiveField(3)
   double radius;
 
-  // @HiveField(4)
-  // bool repeat;
+  @HiveField(4)
+  int? distance;
 
-  // @HiveField(5)
-  // List<bool> days;
+  @HiveField(5)
+  int? travelTime;
 
-  // @HiveField(6)
-  // bool favorite;
+  @HiveField(6)
+  String currentLocation;
+
+  @HiveField(7)
+  String destination;
+
+  @HiveField(8)
+  bool startTrip;
 
   Alarm({
     required this.name,
-    required this.onEnter,
-    required this.onExit,
     required this.radius,
-    // required this.repeat,
-    // required this.days,
-    // required this.favorite,
+    required this.currentLocation,
+    required this.destination,
+    this.distance,
+    this.travelTime,
+    this.startTrip = false,
   });
 }
