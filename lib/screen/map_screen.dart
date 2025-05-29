@@ -27,6 +27,7 @@ class _MapScreenState extends State<MapScreen> {
     zoom: 18.0,
   );
   CameraPosition _currentPosition = _kGooglePlex;
+  double _currentZoom = 18.0;
 
   final searchController = TextEditingController();
   final String sessionToken = const Uuid().v4();
@@ -67,7 +68,7 @@ class _MapScreenState extends State<MapScreen> {
 
     // Listen for location changes
     _locationSubscription = location.onLocationChanged.listen((newLocation) {
-      _updateUserLocation(newLocation, animate: true);
+      _updateUserLocation(newLocation, animate: false);
     });
   }
 
@@ -78,10 +79,6 @@ class _MapScreenState extends State<MapScreen> {
         LatLng(userLocation.latitude!, userLocation.longitude!);
 
     setState(() {
-      _currentPosition = CameraPosition(
-        target: userLatLng,
-        zoom: 19.5,
-      );
       _userLatLng = userLatLng;
       _markers.removeWhere((m) => m.markerId.value == 'user_location');
       _markers.add(
@@ -101,7 +98,7 @@ class _MapScreenState extends State<MapScreen> {
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: userLatLng,
-            zoom: 19.5, // Street-level zoom
+            zoom: _currentZoom,
           ),
         ),
       );
@@ -154,10 +151,13 @@ class _MapScreenState extends State<MapScreen> {
     var detailsData = json.decode(detailsResponse.body);
     double lat = detailsData['result']['geometry']['location']['lat'];
     double lng = detailsData['result']['geometry']['location']['lng'];
+    final LatLng destination = LatLng(lat, lng);
+    
     final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newLatLng(LatLng(lat, lng)));
+    controller.animateCamera(CameraUpdate.newLatLng(destination));
+    
     setState(() {
-      _currentPosition = CameraPosition(target: LatLng(lat, lng), zoom: 18.0);
+      _currentPosition = CameraPosition(target: destination, zoom: _currentZoom);
       searchController.text = description;
       listOfLocation = [];
       isSearching = false;
@@ -165,12 +165,44 @@ class _MapScreenState extends State<MapScreen> {
       _markers.add(
         Marker(
           markerId: MarkerId('searched_location'),
-          position: LatLng(lat, lng),
+          position: destination,
           infoWindow: InfoWindow(title: description),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
       );
     });
+
+    // Get route points if user location is available
+    if (_userLatLng != null) {
+      final routePoints = await _getRouteCoordinates(_userLatLng!, destination);
+      print('Route points: ' + routePoints.length.toString());
+      if (routePoints.isNotEmpty) {
+        setState(() {
+          _polylines.clear();
+          _polylines.add(
+            Polyline(
+              polylineId: PolylineId('route'),
+              color: Colors.blue,
+              width: 5,
+              points: routePoints,
+            ),
+          );
+        });
+      } else {
+        setState(() {
+          _polylines.clear();
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No route found between your location and the destination.')),
+          );
+        }
+      }
+      // Always adjust the camera to show both pins
+      _showBothMarkers();
+    } else {
+      print('User location not available for route drawing.');
+    }
   }
 
   // Add this method to fetch route points
@@ -339,12 +371,12 @@ class _MapScreenState extends State<MapScreen> {
             mapType: MapType.normal,
             initialCameraPosition: _currentPosition,
             markers: _markers,
-            polylines: _polylines, // Add this line
+            polylines: _polylines,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
-              if (_userLocationReady && _userLatLng != null) {
-                controller.animateCamera(CameraUpdate.newLatLng(_userLatLng!));
-              }
+            },
+            onCameraMove: (CameraPosition position) {
+              _currentZoom = position.zoom;
             },
             zoomGesturesEnabled: true,
             zoomControlsEnabled: false,
