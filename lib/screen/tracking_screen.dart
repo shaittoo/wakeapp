@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 
 class TrackingScreen extends StatefulWidget {
   final String destinationName;
@@ -78,15 +79,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
       _alarmed = true;
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Alarm!'),
-          content: Text('You have entered your destination radius.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
-          ],
+        barrierDismissible: false,
+        builder: (context) => AlarmDialog(
+          onStop: () {
+            setState(() {
+              _alarmed = false;
+            });
+            Navigator.of(context).pop();
+          },
+          destLat: widget.destLat,
+          destLng: widget.destLng,
         ),
       );
     }
@@ -350,6 +352,119 @@ class _TrackingScreenState extends State<TrackingScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AlarmDialog extends StatefulWidget {
+  final VoidCallback onStop;
+  final double destLat;
+  final double destLng;
+  const AlarmDialog({Key? key, required this.onStop, required this.destLat, required this.destLng}) : super(key: key);
+
+  @override
+  State<AlarmDialog> createState() => _AlarmDialogState();
+}
+
+class _AlarmDialogState extends State<AlarmDialog> {
+  late AudioPlayer _audioPlayer;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+    _playAlarm();
+  }
+
+  Future<void> _playAlarm() async {
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await _audioPlayer.play(AssetSource('alarm.mp3'));
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.stop();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black.withOpacity(0.4),
+      body: Center(
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 32),
+          padding: EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Color(0xFFFDECEC),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.notifications_active, color: Colors.red, size: 40),
+              ),
+              SizedBox(height: 14),
+              Text('Wake UP', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              SizedBox(height: 6),
+              Text('You are near your destination !', style: TextStyle(fontSize: 13)),
+              SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  color: Colors.grey[200],
+                  width: 250,
+                  height: 100,
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(widget.destLat, widget.destLng),
+                      zoom: 16,
+                    ),
+                    markers: {
+                      Marker(
+                        markerId: MarkerId('dest'),
+                        position: LatLng(widget.destLat, widget.destLng),
+                        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+                      ),
+                    },
+                    zoomControlsEnabled: false,
+                    myLocationButtonEnabled: false,
+                    scrollGesturesEnabled: false,
+                    rotateGesturesEnabled: false,
+                    tiltGesturesEnabled: false,
+                    zoomGesturesEnabled: false,
+                    liteModeEnabled: true,
+                  ),
+                ),
+              ),
+              SizedBox(height: 14),
+              SizedBox(
+                width: 175,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+                    minimumSize: Size(0, 32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: widget.onStop,
+                  child: Text('Stop Alarm', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
