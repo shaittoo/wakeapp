@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'Components/semi_circle_slider.dart';
 import 'tracking_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
 
@@ -19,7 +20,7 @@ class SetAlarmSheet extends StatefulWidget {
 
 class _SetAlarmSheetState extends State<SetAlarmSheet> {
   final TextEditingController _alarmNameController =
-      TextEditingController(text: "University Area");
+      TextEditingController(text: "My Alarm");
   final TextEditingController _currentLocationController =
       TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
@@ -121,7 +122,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Let us wake you up , so you don't miss your destination.",
+                "Let us wake you up, so you don't miss your destination.",
                 style: TextStyle(fontSize: 13, color: Colors.grey[800]),
               ),
             ),
@@ -246,7 +247,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             TextField(
               controller: _alarmNameController,
               decoration: InputDecoration(
-                hintText: 'Enter alarm name',
+                hintText: 'Enter Alarm Name',
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
@@ -269,8 +270,8 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Alarm sound', style: TextStyle(fontWeight: FontWeight.w500)),
-                    Text('Wizkid ft Tems | Essence', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                    Text('Vibrate', style: TextStyle(fontWeight: FontWeight.w500)),
+                    Text('Allow vibration when alarm is triggered', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                   ],
                 ),
                 Switch(
@@ -285,7 +286,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             Center(
               child: SemiCircleSlider(
                 min: 100,
-                max: 2000,
+                max: 1000,
                 value: _radius,
                 onChanged: (val) => setState(() => _radius = val),
                 unit: 'M',
@@ -316,12 +317,24 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: () async {
-                      if (_selectedLat == null || _selectedLng == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Please select a destination first')),
+                      List<String> missingFields = [];
+                      if (_alarmNameController.text.trim().isEmpty) {
+                        missingFields.add('Alarm Name');
+                      }
+                      if (_destinationController.text.trim().isEmpty || _selectedLat == null || _selectedLng == null) {
+                        missingFields.add('Destination');
+                      }
+                      if (missingFields.isNotEmpty) {
+                        Fluttertoast.showToast(
+                          msg: 'Please fill in: ' + missingFields.join(', '),
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.TOP,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
                         );
                         return;
-                      }
+                      } 
                       final alarm = Alarm(
                         name: _alarmNameController.text,
                         radius: _radius,
