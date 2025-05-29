@@ -24,13 +24,15 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       distance: fields[4] as int?,
       travelTime: fields[5] as int?,
       startTrip: fields[8] as bool,
+      destinationLat: fields[9] as double?,
+      destinationLng: fields[10] as double?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Alarm obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(3)
@@ -43,6 +45,10 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       ..write(obj.currentLocation)
       ..writeByte(7)
       ..write(obj.destination)
+      ..writeByte(9)
+      ..write(obj.destinationLat)
+      ..writeByte(10)
+      ..write(obj.destinationLng)
       ..writeByte(8)
       ..write(obj.startTrip);
   }

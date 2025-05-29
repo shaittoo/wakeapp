@@ -22,6 +22,12 @@ class Alarm extends HiveObject {
   @HiveField(7)
   String destination;
 
+  @HiveField(9)
+  double? destinationLat;
+
+  @HiveField(10)
+  double? destinationLng;
+
   @HiveField(8)
   bool startTrip;
 
@@ -33,5 +39,7 @@ class Alarm extends HiveObject {
     this.distance,
     this.travelTime,
     this.startTrip = false,
+    this.destinationLat,
+    this.destinationLng,
   });
 }
