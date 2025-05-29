@@ -32,11 +32,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
   StreamSubscription<LocationData>? _locationSubscription;
   LatLng? _userLatLng;
   bool _alarmed = false;
+  bool _modalCollapsed = false;
+  bool _tripStarted = false;
 
   @override
   void initState() {
     super.initState();
-    _initLocationTracking();
   }
 
   Future<void> _initLocationTracking() async {
@@ -110,6 +111,26 @@ class _TrackingScreenState extends State<TrackingScreen> {
     super.dispose();
   }
 
+  void _startTrip() {
+    if (!_tripStarted) {
+      setState(() {
+        _tripStarted = true;
+        _modalCollapsed = true;
+      });
+      _initLocationTracking();
+    }
+  }
+
+  void _cancelTrip() {
+    setState(() {
+      _tripStarted = false;
+      _modalCollapsed = false;
+    });
+    _locationSubscription?.cancel();
+    _userLatLng = null;
+    _alarmed = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final LatLng destination = LatLng(widget.destLat, widget.destLng);
@@ -159,110 +180,173 @@ class _TrackingScreenState extends State<TrackingScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 12,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.destinationName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Distance', style: TextStyle(color: Colors.grey[700])),
-                          Text('${(widget.radius / 1000).toStringAsFixed(1)} KM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text('Set Radius', style: TextStyle(color: Colors.grey[700])),
-                          Text('${widget.radius.round()} m', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.location_on, color: Colors.red, size: 20),
-                          SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              widget.startName ?? 'Current Location',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.w500),
+            child: AnimatedSwitcher(
+              duration: Duration(milliseconds: 250),
+              child: _modalCollapsed
+                  ? GestureDetector(
+                      key: ValueKey('collapsed'),
+                      onTap: () => setState(() => _modalCollapsed = false),
+                      child: Container(
+                        margin: EdgeInsets.all(16),
+                        padding: EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            widget.destinationName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.black,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                      SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(Icons.location_on, color: Colors.blue, size: 20),
-                          SizedBox(width: 6),
-                          Expanded(
-                            child: (widget.destinationAddress != null && widget.destinationAddress!.isNotEmpty)
-                                ? Text(
-                                    widget.destinationAddress!,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontWeight: FontWeight.w500),
-                                  )
-                                : SizedBox.shrink(),
+                    )
+                  : Stack(
+                      key: ValueKey('expanded'),
+                      children: [
+                        Container(
+                          margin: EdgeInsets.all(16),
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 12,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF7B61FF),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    widget.destinationName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.expand_more, color: Colors.grey[700]),
+                                    onPressed: () => setState(() => _modalCollapsed = true),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Distance', style: TextStyle(color: Colors.grey[700])),
+                                      Text('${(widget.radius / 1000).toStringAsFixed(1)} KM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text('Set Radius', style: TextStyle(color: Colors.grey[700])),
+                                      Text('${widget.radius.round()} m', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.location_on, color: Colors.red, size: 20),
+                                      SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          widget.startName ?? 'Current Location',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.location_on, color: Colors.blue, size: 20),
+                                      SizedBox(width: 6),
+                                      Expanded(
+                                        child: (widget.destinationAddress != null && widget.destinationAddress!.isNotEmpty)
+                                            ? Text(
+                                                widget.destinationAddress!,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontWeight: FontWeight.w500),
+                                              )
+                                            : SizedBox.shrink(),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 18),
+                              SizedBox(
+                                width: double.infinity,
+                                child: _tripStarted
+                                    ? ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          padding: EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        onPressed: _cancelTrip,
+                                        child: Text(
+                                          'Cancel Trip',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      )
+                                    : ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color(0xFF7B61FF),
+                                          foregroundColor: Colors.white,
+                                          padding: EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        onPressed: _startTrip,
+                                        child: Text(
+                                          'Start My Trip',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      onPressed: () {
-                        // TODO: Implement start trip logic
-                      },
-                      child: Text(
-                        'Start My Trip',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
