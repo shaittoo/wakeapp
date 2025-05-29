@@ -23,8 +23,8 @@ class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(0, 0),
-    zoom: 18.0,
+    target: LatLng(10.6426908, 122.2311147),
+    zoom: 16.0,
   );
   CameraPosition _currentPosition = _kGooglePlex;
   double _currentZoom = 18.0;
