@@ -340,6 +340,8 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                         radius: _radius,
                         currentLocation: _currentLocationController.text,
                         destination: _destinationController.text,
+                        destinationLat: _selectedLat,
+                        destinationLng: _selectedLng,
                       );
                       final box = Hive.box<Alarm>('alarms');
                       await box.add(alarm);

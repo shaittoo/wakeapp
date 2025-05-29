@@ -190,7 +190,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       onTap: () => setState(() => _modalCollapsed = false),
                       child: Container(
                         margin: EdgeInsets.all(16),
-                        padding: EdgeInsets.symmetric(vertical: 18, horizontal: 28),
+                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(24),
@@ -248,7 +248,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 8),
+                              SizedBox(height: 4),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -268,7 +268,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 16),
+                              SizedBox(height: 8),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -279,13 +279,14 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                       Expanded(
                                         child: Text(
                                           widget.startName ?? 'Current Location',
-                                          overflow: TextOverflow.ellipsis,
+                                          softWrap: true,
+                                          overflow: TextOverflow.visible,
                                           style: TextStyle(fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 6),
+                                  SizedBox(height: 4),
                                   Row(
                                     children: [
                                       Icon(Icons.location_on, color: Colors.blue, size: 20),
@@ -294,7 +295,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                         child: (widget.destinationAddress != null && widget.destinationAddress!.isNotEmpty)
                                             ? Text(
                                                 widget.destinationAddress!,
-                                                overflow: TextOverflow.ellipsis,
+                                                softWrap: true,
+                                                overflow: TextOverflow.visible,
                                                 style: TextStyle(fontWeight: FontWeight.w500),
                                               )
                                             : SizedBox.shrink(),
@@ -303,7 +305,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 18),
+                              SizedBox(height: 10),
                               SizedBox(
                                 width: double.infinity,
                                 child: _tripStarted
@@ -412,11 +414,11 @@ class _AlarmDialogState extends State<AlarmDialog> {
                 ),
                 child: Icon(Icons.notifications_active, color: Colors.red, size: 40),
               ),
-              SizedBox(height: 14),
+              SizedBox(height: 8),
               Text('Wake UP', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              SizedBox(height: 6),
+              SizedBox(height: 4),
               Text('You are near your destination !', style: TextStyle(fontSize: 13)),
-              SizedBox(height: 12),
+              SizedBox(height: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
@@ -445,7 +447,7 @@ class _AlarmDialogState extends State<AlarmDialog> {
                   ),
                 ),
               ),
-              SizedBox(height: 14),
+              SizedBox(height: 8),
               SizedBox(
                 width: 175,
                 child: ElevatedButton(
@@ -458,8 +460,11 @@ class _AlarmDialogState extends State<AlarmDialog> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: widget.onStop,
-                  child: Text('Stop Alarm', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  onPressed: () {
+                    widget.onStop();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                  child: Text('Exit Trip', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
               ),
             ],
