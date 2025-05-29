@@ -5,6 +5,8 @@ import 'package:location/location.dart'; // <-- Add this import
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+import 'Components/semi_circle_slider.dart';
+import 'tracking_screen.dart';
 
 const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
 
@@ -24,8 +26,6 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
   final String _destinationSessionToken = const Uuid().v4();
   List<dynamic> _destinationSuggestions = [];
   bool _isDestinationSearching = false;
-  bool _onEnter = false;
-  bool _onExit = true;
   double _radius = 750;
 
   // Add these variables to store selected location
@@ -93,10 +93,10 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        left: 20,
+        right: 20,
+        top: 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -106,181 +106,192 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Set Alarm',
+                Text('Create Trip Alarm',
                     style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green[900])),
+                        color: Colors.green[800])),
                 IconButton(
                   icon: Icon(Icons.close, color: Colors.red),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // --- Add these two textboxes here ---
-            TextField(
-              controller: _currentLocationController,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'Current Location',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(),
+            SizedBox(height: 2),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Let us wake you up , so you don't miss your destination.",
+                style: TextStyle(fontSize: 13, color: Colors.grey[800]),
               ),
             ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _destinationController,
-              decoration: InputDecoration(
-                labelText: 'Destination',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _isDestinationSearching = true;
-                });
-                _fetchDestinationSuggestions(value);
-              },
-            ),
-            // Add this part for the dropdown suggestions
-            if (_isDestinationSearching && _destinationSuggestions.isNotEmpty)
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                    ),
+            SizedBox(height: 12),
+            // Start and End locations
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    Icon(Icons.radio_button_checked, color: Colors.green, size: 20),
+                    Container(width: 2, height: 32, color: Colors.green[200]),
+                    Icon(Icons.location_on, color: Colors.blue, size: 20),
                   ],
                 ),
-                constraints: BoxConstraints(maxHeight: 200),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _destinationSuggestions.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title:
-                          Text(_destinationSuggestions[index]["description"]),
-                      onTap: () async {
-                        String placeId =
-                            _destinationSuggestions[index]["place_id"];
-                        String description =
-                            _destinationSuggestions[index]["description"];
-
-                        // Fetch the coordinates for the selected place
-                        String detailsUrl =
-                            "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$kGoogleApiKey";
-                        var detailsResponse =
-                            await http.get(Uri.parse(detailsUrl));
-                        var detailsData = json.decode(detailsResponse.body);
-
-                        // Get the coordinates
-                        double lat = detailsData['result']['geometry']
-                            ['location']['lat'];
-                        double lng = detailsData['result']['geometry']
-                            ['location']['lng'];
-
-                        print(
-                            'Selected destination: $description at ($lat, $lng)');
-
-                        setState(() {
-                          _destinationController.text = description;
-                          _isDestinationSearching = false;
-                          _destinationSuggestions = [];
-                          // Store the selected location
-                          _selectedDescription = description;
-                          _selectedLat = lat;
-                          _selectedLng = lng;
-                        });
-                      },
-                    );
-                  },
+                SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _currentLocationController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          hintText: 'Start location',
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.green, width: 2),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.green, width: 2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.green, width: 2),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      TextField(
+                        controller: _destinationController,
+                        decoration: InputDecoration(
+                          hintText: 'Destination',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.green, width: 2),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.green, width: 2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.green, width: 2),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _isDestinationSearching = true;
+                          });
+                          _fetchDestinationSuggestions(value);
+                        },
+                      ),
+                      if (_isDestinationSearching && _destinationSuggestions.isNotEmpty)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          constraints: BoxConstraints(maxHeight: 200),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _destinationSuggestions.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(_destinationSuggestions[index]["description"]),
+                                onTap: () async {
+                                  String placeId = _destinationSuggestions[index]["place_id"];
+                                  String description = _destinationSuggestions[index]["description"];
+                                  String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$kGoogleApiKey";
+                                  var detailsResponse = await http.get(Uri.parse(detailsUrl));
+                                  var detailsData = json.decode(detailsResponse.body);
+                                  double lat = detailsData['result']['geometry']['location']['lat'];
+                                  double lng = detailsData['result']['geometry']['location']['lng'];
+                                  setState(() {
+                                    _destinationController.text = description;
+                                    _isDestinationSearching = false;
+                                    _destinationSuggestions = [];
+                                    _selectedDescription = description;
+                                    _selectedLat = lat;
+                                    _selectedLng = lng;
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            // Set alarm name label
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: 4.0, bottom: 4),
+                child: Text(
+                  'Set Alarm Name',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green[900]),
                 ),
               ),
-            SizedBox(height: 16),
-            // Alarm Name
+            ),
+            // Set alarm name input box
             TextField(
               controller: _alarmNameController,
               decoration: InputDecoration(
-                labelText: 'Alarm Name',
+                hintText: 'Enter alarm name',
                 filled: true,
                 fillColor: Colors.white,
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 24),
-            // On Enter / On Exit
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Checkboxes and labels
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Checkboxes Row
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _onEnter,
-                            activeColor: Colors.green,
-                            onChanged: (val) => setState(() => _onEnter = val!),
-                          ),
-                          Text('On Enter'),
-                          SizedBox(width: 16),
-                          Checkbox(
-                            value: _onExit,
-                            activeColor: Colors.green,
-                            onChanged: (val) => setState(() => _onExit = val!),
-                          ),
-                          Text('On Exit'),
-                        ],
-                      ),
-                      // Radius controls
-                      Slider(
-                        value: _radius,
-                        min: 100,
-                        max: 2000,
-                        divisions: 19,
-                        activeColor: Colors.orange,
-                        onChanged: (val) => setState(() => _radius = val),
-                      ),
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // Center horizontally
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '${_radius.round()} M',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Radius',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 8),
-                ],
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green, width: 2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green, width: 2),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green, width: 2),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               ),
             ),
             SizedBox(height: 16),
+            // Alarm sound toggle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Alarm sound', style: TextStyle(fontWeight: FontWeight.w500)),
+                    Text('Wizkid ft Tems | Essence', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
+                ),
+                Switch(
+                  value: true,
+                  onChanged: (v) {},
+                  activeColor: Colors.green,
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            // Semi-circle radius controller
+            Center(
+              child: SemiCircleSlider(
+                min: 100,
+                max: 2000,
+                value: _radius,
+                onChanged: (val) => setState(() => _radius = val),
+                unit: 'M',
+              ),
+            ),
+            SizedBox(height: 30),
             // Buttons
             Row(
               children: [
@@ -288,13 +299,12 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.green,
-                      backgroundColor: Colors.grey[300],
-                      side: BorderSide(color: Colors.grey[300]!),
+                      backgroundColor: Colors.white,
+                      side: BorderSide(color: Colors.green),
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: Text('Cancel',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text('Cancel', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
                 SizedBox(width: 16),
@@ -308,36 +318,36 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
                     onPressed: () async {
                       if (_selectedLat == null || _selectedLng == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text('Please select a destination first')),
+                          SnackBar(content: Text('Please select a destination first')),
                         );
                         return;
                       }
-
                       final alarm = Alarm(
                         name: _alarmNameController.text,
-                        onEnter: _onEnter,
-                        onExit: _onExit,
                         radius: _radius,
+                        currentLocation: _currentLocationController.text,
+                        destination: _destinationController.text,
                       );
                       final box = Hive.box<Alarm>('alarms');
                       await box.add(alarm);
-
-                      print('Sending from SetAlarmSheet:');
-                      print('Name: $_selectedDescription');
-                      print('Location: $_selectedLat, $_selectedLng');
-
                       if (mounted) {
-                        Navigator.pop(context, {
-                          'name': _selectedDescription,
-                          'lat': _selectedLat,
-                          'lng': _selectedLng,
-                        });
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TrackingScreen(
+                              destinationName: _alarmNameController.text,
+                              destLat: _selectedLat!,
+                              destLng: _selectedLng!,
+                              radius: _radius,
+                              startName: _currentLocationController.text,
+                              destinationAddress: _destinationController.text,
+                            ),
+                          ),
+                        );
                       }
                     },
-                    child: Text('Start Alarm',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text('Create', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
