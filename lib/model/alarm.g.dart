@@ -18,12 +18,12 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
     };
     return Alarm(
       name: fields[0] as String,
-      onEnter: fields[1] as bool,
-      onExit: fields[2] as bool,
       radius: fields[3] as double,
-      // repeat: fields[4] as bool,
-      // days: (fields[5] as List).cast<bool>(),
-      // favorite: fields[6] as bool,
+      currentLocation: fields[6] as String,
+      destination: fields[7] as String,
+      distance: fields[4] as int?,
+      travelTime: fields[5] as int?,
+      startTrip: fields[8] as bool,
     );
   }
 
@@ -33,18 +33,18 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       ..writeByte(7)
       ..writeByte(0)
       ..write(obj.name)
-      ..writeByte(1)
-      ..write(obj.onEnter)
-      ..writeByte(2)
-      ..write(obj.onExit)
       ..writeByte(3)
       ..write(obj.radius)
-      ..writeByte(4);
-    // ..write(obj.repeat)
-    // ..writeByte(5)
-    // ..write(obj.days)
-    // ..writeByte(6)
-    // ..write(obj.favorite);
+      ..writeByte(4)
+      ..write(obj.distance)
+      ..writeByte(5)
+      ..write(obj.travelTime)
+      ..writeByte(6)
+      ..write(obj.currentLocation)
+      ..writeByte(7)
+      ..write(obj.destination)
+      ..writeByte(8)
+      ..write(obj.startTrip);
   }
 
   @override
