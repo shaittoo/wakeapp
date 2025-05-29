@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wakeapp/screen/splash_screen.dart';
 import 'screen/map_screen.dart';
-import 'screen/timer_screen.dart';
+import 'screen/alarm_list.dart';
 import 'package:wakeapp/screen/setalarm.dart' as setalarm;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'model/alarm.dart';
@@ -10,7 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(AlarmAdapter());
-  deleteAlarmsBox();
+  await Hive.deleteBoxFromDisk('alarms');
   await Hive.openBox<Alarm>('alarms');
   runApp(const MyApp());
 }

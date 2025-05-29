@@ -58,28 +58,6 @@ class TimerScreen extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.login, size: 16, color: Colors.green[700]),
-                          SizedBox(width: 8),
-                          Text(
-                            'On Enter: ${alarm.onEnter ? "Yes" : "No"}',
-                            style: TextStyle(color: Colors.green[800]),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.logout,
-                              size: 16, color: Colors.green[700]),
-                          SizedBox(width: 8),
-                          Text(
-                            'On Exit: ${alarm.onExit ? "Yes" : "No"}',
-                            style: TextStyle(color: Colors.green[800]),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                   trailing: IconButton(
