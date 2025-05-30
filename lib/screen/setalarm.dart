@@ -263,25 +263,7 @@ class _SetAlarmSheetState extends State<SetAlarmSheet> {
               ),
             ),
             SizedBox(height: 16),
-            // Alarm sound toggle
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Vibrate', style: TextStyle(fontWeight: FontWeight.w500)),
-                    Text('Allow vibration when alarm is triggered', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  ],
-                ),
-                Switch(
-                  value: true,
-                  onChanged: (v) {},
-                  activeColor: Colors.green,
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
+
             // Semi-circle radius controller
             Center(
               child: SemiCircleSlider(
