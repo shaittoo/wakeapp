@@ -4,6 +4,9 @@ import 'package:location/location.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'dart:convert';
 
 class TrackingScreen extends StatefulWidget {
   final String destinationName;
@@ -35,6 +38,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   bool _alarmed = false;
   bool _modalCollapsed = false;
   bool _tripStarted = false;
+  List<LatLng> _routePoints = [];
 
   @override
   void initState() {
@@ -66,6 +70,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       _userLatLng = userLatLng;
     });
     _checkAlarm(userLatLng);
+    _getRoutePolyline(userLatLng, LatLng(widget.destLat, widget.destLng));
   }
 
   void _checkAlarm(LatLng userLatLng) {
@@ -105,6 +110,26 @@ class _TrackingScreenState extends State<TrackingScreen> {
             (sin(dLon / 2) * sin(dLon / 2));
     final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
+  }
+
+  Future<void> _getRoutePolyline(LatLng start, LatLng end) async {
+    const String apiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+    final String url =
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&key=$apiKey';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['routes'] != null && data['routes'].isNotEmpty) {
+        final points = data['routes'][0]['overview_polyline']['points'];
+        PolylinePoints polylinePoints = PolylinePoints();
+        List<PointLatLng> result = polylinePoints.decodePolyline(points);
+        setState(() {
+          _routePoints = result
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList();
+        });
+      }
+    }
   }
 
   @override
@@ -168,12 +193,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 ),
             },
             polylines: {
-              if (_userLatLng != null)
+              if (_routePoints.isNotEmpty)
                 Polyline(
                   polylineId: PolylineId('route'),
-                  color: Colors.orange,
+                  color: Colors.blue,
                   width: 6,
-                  points: [_userLatLng!, destination],
+                  points: _routePoints,
                 ),
             },
             onMapCreated: (controller) => _mapController = controller,
