@@ -41,6 +41,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   bool _modalCollapsed = false;
   bool _tripStarted = false;
   List<LatLng> _routePoints = [];
+  double? _calculatedDistance;
 
   @override
   void initState() {
@@ -68,8 +69,15 @@ class _TrackingScreenState extends State<TrackingScreen> {
   void _updateUserLocation(LocationData userLocation) {
     if (userLocation.latitude == null || userLocation.longitude == null) return;
     final LatLng userLatLng = LatLng(userLocation.latitude!, userLocation.longitude!);
+    final double distance = _calculateDistance(
+      userLatLng.latitude,
+      userLatLng.longitude,
+      widget.destLat,
+      widget.destLng,
+    );
     setState(() {
       _userLatLng = userLatLng;
+      _calculatedDistance = distance;
     });
     _checkAlarm(userLatLng);
     _getRoutePolyline(userLatLng, LatLng(widget.destLat, widget.destLng));
@@ -283,7 +291,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text('Distance', style: TextStyle(color: Colors.grey[700])),
-                                      Text('${(widget.radius / 1000).toStringAsFixed(1)} KM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                      Text(
+                                      _calculatedDistance != null
+                                          ? '${(_calculatedDistance! / 1000).toStringAsFixed(2)} KM'
+                                          : '--',)
                                     ],
                                   ),
                                   Column(
