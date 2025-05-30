@@ -4,6 +4,8 @@ import 'package:location/location.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:vibration/vibration.dart';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:convert';
@@ -396,6 +398,7 @@ class AlarmDialog extends StatefulWidget {
 
 class _AlarmDialogState extends State<AlarmDialog> {
   late AudioPlayer _audioPlayer;
+  late Timer _vibrationTimer;
 
   @override
   void initState() {
@@ -405,14 +408,26 @@ class _AlarmDialogState extends State<AlarmDialog> {
   }
 
   Future<void> _playAlarm() async {
-    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    await _audioPlayer.play(AssetSource('alarm.mp3'));
+    try {
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.play(AssetSource('alarm.mp3'));
+
+      if (await Vibration.hasVibrator()) {
+        _vibrationTimer = Timer.periodic(Duration(seconds: 2), (_) {
+          Vibration.vibrate(duration: 1000); // vibrate for 1 second
+        });
+      }
+    } catch (e) {
+      debugPrint('Error playing alarm or vibrating: $e');
+    }
   }
 
   @override
   void dispose() {
     _audioPlayer.stop();
     _audioPlayer.dispose();
+    Vibration.cancel();
+    _vibrationTimer.cancel();
     super.dispose();
   }
 
