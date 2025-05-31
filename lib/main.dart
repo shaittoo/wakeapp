@@ -5,8 +5,10 @@ import 'screen/alarm_list.dart';
 import 'package:wakeapp/screen/setalarm.dart' as setalarm;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'model/alarm.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(AlarmAdapter());
