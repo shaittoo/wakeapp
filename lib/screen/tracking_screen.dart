@@ -5,10 +5,10 @@ import 'dart:async';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:vibration/vibration.dart';
-import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class TrackingScreen extends StatefulWidget {
   final String destinationName;
@@ -123,7 +123,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   }
 
   Future<void> _getRoutePolyline(LatLng start, LatLng end) async {
-    const String apiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+    final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&key=$apiKey';
     final response = await http.get(Uri.parse(url));

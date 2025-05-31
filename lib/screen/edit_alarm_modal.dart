@@ -5,8 +5,9 @@ import 'Components/semi_circle_slider.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+final kGoogleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
 class EditAlarmModal extends StatefulWidget {
   final Alarm alarm;
