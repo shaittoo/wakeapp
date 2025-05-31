@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:location/location.dart';
 
-const kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+const kGoogleApiKey = '';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
