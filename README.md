@@ -1,20 +1,12 @@
-<<<<<<< HEAD
-# wakeapp
+# WakeApp
 
-A new Flutter project.
+## Setup
 
-## Getting Started
+1. Clone the repository
+2. Copy `.env.template` to `.env`
+3. Add your Google Maps API key to the `.env` file
+4. Run `flutter pub get`
+5. Run the app with `flutter run`
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# wakeapp
->>>>>>> 8491c946b78c9fbcd16cce08475422ffbd0dda87
+## API Keys Required
+- Google Maps API Key: Used for maps, geocoding, and directions
