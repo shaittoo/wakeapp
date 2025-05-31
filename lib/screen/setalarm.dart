@@ -8,8 +8,9 @@ import 'package:uuid/uuid.dart';
 import 'Components/semi_circle_slider.dart';
 import 'tracking_screen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const String kGoogleApiKey = '';
+final kGoogleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
 class SetAlarmSheet extends StatefulWidget {
   const SetAlarmSheet({super.key});
