@@ -9,13 +9,13 @@ class SemiCircleSlider extends StatefulWidget {
   final String unit;
 
   const SemiCircleSlider({
-    Key? key,
+    super.key,
     required this.min,
     required this.max,
     required this.value,
     required this.onChanged,
     this.unit = 'M',
-  }) : super(key: key);
+  });
 
   @override
   State<SemiCircleSlider> createState() => _SemiCircleSliderState();
