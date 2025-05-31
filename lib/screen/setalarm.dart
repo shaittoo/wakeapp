@@ -9,7 +9,7 @@ import 'Components/semi_circle_slider.dart';
 import 'tracking_screen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+const String kGoogleApiKey = '';
 
 class SetAlarmSheet extends StatefulWidget {
   const SetAlarmSheet({super.key});

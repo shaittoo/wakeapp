@@ -123,7 +123,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   }
 
   Future<void> _getRoutePolyline(LatLng start, LatLng end) async {
-    const String apiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+    const String apiKey = '';
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&key=$apiKey';
     final response = await http.get(Uri.parse(url));

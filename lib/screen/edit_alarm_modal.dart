@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const String kGoogleApiKey = 'AIzaSyCv3FFr20CIXT48UA5LdiO_eEffceacY0Q';
+const String kGoogleApiKey = '';
 
 class EditAlarmModal extends StatefulWidget {
   final Alarm alarm;
